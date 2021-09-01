@@ -1,54 +1,97 @@
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:flutter_screen/src/page/pick_from_url_view.dart';
+import 'package:flutter_screen/src/widget/custom_icon_view.dart';
+import 'package:flutter_to_airplay/flutter_to_airplay.dart';
 
 
-class HomePage extends StatefulWidget {
-    HomePage({Key? key, required this.title}) : super(key: key);
 
-
-    final String title;
-
+class MyApp extends StatefulWidget {
     @override
-    _HomePageState createState() => _HomePageState();
+    _MyAppState createState() => _MyAppState();
 }
 
-class _HomePageState extends State<HomePage> {
-    int _counter = 0;
+class _MyAppState extends State<MyApp> {
+    String _platformVersion = 'no se encontro ios';
 
-    void _incrementCounter() {
-        setState(() {
+    @override
+    void initState() {
+        super.initState();
+        initPlatformState();
+    }
 
-            _counter++;
-        });
+    // Platform messages are asynchronous, so we initialize in an async method.
+    Future<void> initPlatformState() async {
+        String platformVersion;
+        // Platform messages may fail, so we use a try/catch PlatformException.
+        try {
+            platformVersion = await FlutterToAirplay.platformVersion;
+        } on PlatformException {
+            platformVersion = 'Failed to get platform version.';
+        }
+
+        if (!mounted) return;
+
+        setState(() {_platformVersion = platformVersion;});
     }
 
     @override
     Widget build(BuildContext context) {
-
-        return Scaffold(
-            appBar: AppBar(
-
-                title: Text(widget.title),
-            ),
-            body: Center(
-
-                child: Column(
-
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                        Text(
-                            'You have pushed the button this many times:',
-                        ),
-                        Text(
-                            '$_counter',
-                            style: Theme.of(context).textTheme.headline4,
-                        ),
-                    ],
+        return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            home: Scaffold(
+                appBar: AppBar(
+                    title: Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                            const Text('Test apple tv'),
+                            Text(
+                                _platformVersion,
+                                style: TextStyle(fontSize: 12.0),
+                            ),
+                        ],
+                    ),
                 ),
-            ),
-            floatingActionButton: FloatingActionButton(
-                onPressed: _incrementCounter,
-                tooltip: 'Increment',
-                child: Icon(Icons.add),
+                body: SafeArea(
+                    child: Container(
+                        // height: MediaQuery.of(context).size.height,
+                        // width: MediaQuery.of(context).size.width,
+                        child: ListView.builder(
+                            itemCount: 3,
+                            itemBuilder: (context, index) {
+                                switch (index) {
+                                    case 1:
+                                        return ListTile(
+                                            onTap: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => PickFromURLView(),
+                                                ),
+                                            ),
+                                            title: Text('Video from URL PARA IOS'),
+                                            trailing: Icon(Icons.chevron_right),
+                                        );
+                                        break;
+                                    case 2:
+                                        return ListTile(
+                                            onTap: () => Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (context) => CustomIconView(),
+                                                ),
+                                            ),
+                                            title: Text('Custom Icon PARA IOS'),
+                                            trailing: Icon(Icons.chevron_right),
+                                        );
+                                        break;
+                                    default:
+                                        return Container();
+                                }
+                            },
+                        ),
+                    ),
+                ),
             ),
         );
     }
